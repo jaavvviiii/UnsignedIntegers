@@ -10,7 +10,7 @@ module unsigned2_module
 
     !Array of Unsigned Integer (kind=2) type
     type unsigned2_array_type
-        integer :: size = 0
+        integer*8 :: size = 0
         integer*2, pointer, dimension (:) :: int
     end type unsigned2_array_type
 
@@ -58,12 +58,12 @@ module unsigned2_module
     subroutine allocate_unsigned2_array(array, size)
         implicit none
         type (unsigned2_array_type), intent (inout) :: array
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         integer :: err
         call deallocate_unsigned2_array(array)
         if (size.gt.0) then
             allocate(array%int(size), stat = err)
-            if (err.eq.0) then
+            if (err.ne.0) then
                 write(*,*) 'ERROR in unsigned2 allocation'
             end if
             array%size = size
@@ -73,7 +73,7 @@ module unsigned2_module
     !Returns an array of 'size' Unsigned Integer (kind=2) numbers
     function new_unsigned2_array(size)
         implicit none
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         type (unsigned2_array_type) :: new_unsigned2_array
         call allocate_unsigned2_array(new_unsigned2_array, size)
     end function new_unsigned2_array
@@ -96,7 +96,7 @@ module unsigned2_module
     subroutine set_array2_values(array, number)
         implicit none
         type (unsigned2_array_type), intent(inout) :: array
-        integer, intent(in) :: number
+        integer*2, intent(in) :: number
         integer :: i
         integer :: unsigned
         forall ( i=1: array%size)
@@ -109,7 +109,7 @@ module unsigned2_module
     subroutine set_Unsigned2_value(array, position, number)
         implicit none
         type (unsigned2_array_type), intent(inout) :: array
-        integer, intent(in) :: position
+        integer*8, intent(in) :: position
         integer, intent(in) :: number
         array%int(position) = Unsigned2ToSigned2(number)
     end subroutine set_Unsigned2_value
@@ -119,17 +119,29 @@ module unsigned2_module
     function get_Unsigned2_value(array, position)
         implicit none
         type (unsigned2_array_type), intent(in) :: array
-        integer, intent(in) :: position
+        integer*8, intent(in) :: position
         integer :: get_Unsigned2_value
         get_Unsigned2_value = Signed2ToUnsigned2(array%int(position))
     end function get_Unsigned2_value
 
+    !Returns the number of bytes required to store the Unsigned Integer (kind=2) array
+    function get_bytes_unsigned2_array(array)
+        implicit none
+        type (unsigned2_array_type), intent (in) :: array
+        integer*8 :: get_bytes_unsigned2_array
+        type (unsigned2_array_type) :: tmp
+        get_bytes_unsigned2_array = sizeof(tmp) + (bytessigned2 * array%size)
+    end function get_bytes_unsigned2_array
+
     !Verify that all the numbers that can be represented with the
     !Unsigned Integer (kind=2) type are correct
     subroutine test_signed2()
+        use print_module, only: get_memory_units
+        use unsigned1_module, only: maxUnSigned1
         implicit none
         integer :: i, j
         character*32 :: string
+        type (unSigned2_array_type) :: array
         write(string,*) maxUnsigned2
         write(*,*) 'Unsigned2: From 0 to ' // trim(adjustl(string))
         do i = 0, maxUnsigned2
@@ -138,8 +150,11 @@ module unsigned2_module
                 write(*,*) 'ERROR', i, j
             end if
         end do
+        array%size = maxUnSigned2
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned1 array : ' // get_memory_units(get_bytes_unsigned2_array(array))
+        write(string,*) maxUnSigned1
+        array%size = maxUnSigned1
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned1 array : ' // get_memory_units(get_bytes_unsigned2_array(array))
     end subroutine test_signed2
-
-
 
 end module unsigned2_module

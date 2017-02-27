@@ -15,7 +15,7 @@ module unsigned3_module
 
     !Array of Unsigned Integer (kind=3) type
     type unsigned3_array_type
-        integer :: size = 0
+        integer*8 :: size = 0
         type (unsigned3_type), pointer, dimension (:) :: int
     end type unsigned3_array_type
 
@@ -100,12 +100,12 @@ module unsigned3_module
     subroutine allocate_unsigned3_array(array, size)
         implicit none
         type (unsigned3_array_type), intent (inout) :: array
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         integer :: err
         call deallocate_unsigned3_array(array)
         if (size.gt.0) then
             allocate(array%int(size), stat = err)
-            if (err.eq.0) then
+            if (err.ne.0) then
                 write(*,*) 'ERROR in unsigned3 allocation'
             end if
             array%size = size
@@ -115,7 +115,7 @@ module unsigned3_module
     !Returns an array of 'size' Unsigned Integer (kind=3) numbers
     function new_unsigned3_array(size)
         implicit none
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         type (unsigned3_array_type) :: new_unsigned3_array
         call allocate_unsigned3_array(new_unsigned3_array, size)
     end function new_unsigned3_array
@@ -149,30 +149,43 @@ module unsigned3_module
 
     !Set an Unsigned Integer (kind=3) value in the given 
     !position of the array
-    subroutine set_signed3_value(array, position, number)
+    subroutine set_unsigned3_value_position(array, position, number)
         implicit none
         type (unsigned3_array_type), intent(inout) :: array
-        integer, intent(in) :: position
+        integer*8, intent(in) :: position
         integer, intent(in) :: number
         array%int(position) = number
-    end subroutine set_signed3_value
+    end subroutine set_unsigned3_value_position
 
     !Get the Unsigned Integer (kind=3) value at the given 
     !position of the array
-    function get_signed3_value(array, position)
+    function get_unsigned3_value_position(array, position)
         implicit none
         type (unsigned3_array_type), intent(in) :: array
-        integer, intent(in) :: position
-        integer :: get_signed3_value
-        get_signed3_value = array%int(position)
-    end function get_signed3_value
+        integer*8, intent(in) :: position
+        integer :: get_unsigned3_value_position
+        get_unsigned3_value_position = array%int(position)
+    end function get_unsigned3_value_position
+
+    !Returns the number of bytes required to store the Unsigned Integer (kind=3) array
+    function get_bytes_unsigned3_array(array)
+        implicit none
+        type (unsigned3_array_type), intent (in) :: array
+        integer*8 :: get_bytes_unsigned3_array
+        type (unsigned3_array_type) :: tmp
+        get_bytes_unsigned3_array = sizeof(tmp) + (bytessigned3 * array%size)
+    end function get_bytes_unsigned3_array
 
     !Verify that all the numbers that can be represented with the
     !Unsigned Integer (kind=3) type are correct
     subroutine test_signed3()
+        use print_module, only: get_memory_units
+        use unsigned1_module, only: maxUnSigned1
+        use unsigned2_module, only: maxUnSigned2
         implicit none
         integer :: i, j
         character*32 :: string
+        type (unSigned3_array_type) :: array
         write(string,*) maxUnsigned3
         write(*,*) 'Unsigned3: From 0 to ' // trim(adjustl(string))
         do i = 0, maxUnsigned3
@@ -181,6 +194,14 @@ module unsigned3_module
                 write(*,*) 'ERROR', i, j
             end if
         end do
+        array%size = maxUnSigned3
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned3 array : ' // get_memory_units(get_bytes_unsigned3_array(array))
+        write(string,*) maxUnSigned1
+        array%size = maxUnSigned1
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned3 array : ' // get_memory_units(get_bytes_unsigned3_array(array))
+        write(string,*) maxUnSigned2
+        array%size = maxUnSigned2
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned3 array : ' // get_memory_units(get_bytes_unsigned3_array(array))
     end subroutine test_signed3
 
 

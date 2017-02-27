@@ -10,7 +10,7 @@ module unsigned1_module
 
     !Array of Unsigned Integer (kind=4) type
     type unsigned1_array_type
-        integer :: size = 0
+        integer*8 :: size = 0
         integer*1, pointer, dimension (:) :: int
     end type unsigned1_array_type
 
@@ -58,12 +58,12 @@ module unsigned1_module
     subroutine allocate_unsigned1_array(array, size)
         implicit none
         type (unsigned1_array_type), intent (inout) :: array
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         integer :: err
         call deallocate_unsigned1_array(array)
         if (size.gt.0) then
             allocate(array%int(size), stat = err)
-            if (err.eq.0) then
+            if (err.ne.0) then
                 write(*,*) 'ERROR in unsigned1 allocation'
             end if
             array%size = size
@@ -73,7 +73,7 @@ module unsigned1_module
     !Returns an array of 'size' Unsigned Integer (kind=1) numbers
     function new_unsigned1_array(size)
         implicit none
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         type (unsigned1_array_type) :: new_unsigned1_array
         call allocate_unsigned1_array(new_unsigned1_array, size)
     end function new_unsigned1_array
@@ -109,7 +109,7 @@ module unsigned1_module
     subroutine set_Unsigned1_value(array, position, number)
         implicit none
         type (unsigned1_array_type), intent(inout) :: array
-        integer, intent(in) :: position
+        integer*8, intent(in) :: position
         integer*2, intent(in) :: number
         array%int(position) = Unsigned1Tosigned1(number)
     end subroutine set_Unsigned1_value
@@ -119,17 +119,28 @@ module unsigned1_module
     function get_Unsigned1_value(array, position)
         implicit none
         type (unsigned1_array_type), intent(in) :: array
-        integer, intent(in) :: position
+        integer*8, intent(in) :: position
         integer :: get_Unsigned1_value
         get_Unsigned1_value = signed1ToUnsigned1(array%int(position))
     end function get_Unsigned1_value
 
+    !Returns the number of bytes required to store the Unsigned Integer (kind=1) array
+    function get_bytes_unsigned1_array(array)
+        implicit none
+        type (unsigned1_array_type), intent (in) :: array
+        integer*8 :: get_bytes_unsigned1_array
+        type (unsigned1_array_type) :: tmp
+        get_bytes_unsigned1_array = sizeof(tmp) + (bytessigned1 * array%size)
+    end function get_bytes_unsigned1_array
+
     !Verify that all the numbers that can be represented with the
     !Unsigned Integer (kind=1) type are correct
     subroutine test_signed1()
+        use print_module, only: get_memory_units
         implicit none
         integer*2 :: i, j
         character*32 :: string
+        type (unSigned1_array_type) :: array
         write(string,*) maxUnsigned1
         write(*,*) 'Unsigned1: From 0 to ' // trim(adjustl(string))
         do i = 0, maxUnsigned1
@@ -138,8 +149,8 @@ module unsigned1_module
                 write(*,*) 'ERROR', i, j
             end if
         end do
+        array%size = maxUnSigned1
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned1 array : ' // get_memory_units(get_bytes_unsigned1_array(array))
     end subroutine test_signed1
-
-
 
 end module unsigned1_module

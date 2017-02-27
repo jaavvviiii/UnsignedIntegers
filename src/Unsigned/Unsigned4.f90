@@ -10,7 +10,7 @@ module unSigned4_module
 
     !Array of Unsigned Integer (kind=4) type
     type unSigned4_array_type
-        integer :: size = 0
+        integer*8 :: size = 0
         integer*4, pointer, dimension (:) :: int
     end type unSigned4_array_type
 
@@ -58,12 +58,12 @@ module unSigned4_module
     subroutine allocate_unSigned4_array(array, size)
         implicit none
         type (unSigned4_array_type), intent (inout) :: array
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         integer :: err
         call deallocate_unSigned4_array(array)
         if (size.gt.0) then
             allocate(array%int(size), stat = err)
-            if (err.eq.0) then
+            if (err.ne.0) then
                 write(*,*) 'ERROR in unSigned4 allocation'
             end if
             array%size = size
@@ -73,7 +73,7 @@ module unSigned4_module
     !Returns an array of 'size' Unsigned Integer (kind=4) numbers
     function new_unSigned4_array(size)
         implicit none
-        integer, intent(in) :: size
+        integer*8, intent(in) :: size
         type (unSigned4_array_type) :: new_unSigned4_array
         call allocate_unSigned4_array(new_unSigned4_array, size)
     end function new_unSigned4_array
@@ -109,7 +109,7 @@ module unSigned4_module
     subroutine set_UnSigned4_value(array, position, number)
         implicit none
         type (unSigned4_array_type), intent(inout) :: array
-        integer, intent(in) :: position
+        integer*8, intent(in) :: position
         integer*8, intent(in) :: number
         array%int(position) = UnSigned4ToSigned4(number)
     end subroutine set_UnSigned4_value
@@ -119,17 +119,31 @@ module unSigned4_module
     function get_UnSigned4_value(array, position)
         implicit none
         type (unSigned4_array_type), intent(in) :: array
-        integer, intent(in) :: position
+        integer*8, intent(in) :: position
         integer :: get_UnSigned4_value
         get_UnSigned4_value = Signed4ToUnSigned4(array%int(position))
     end function get_UnSigned4_value
 
+    !Returns the number of bytes required to store the Unsigned Integer (kind=4) array
+    function get_bytes_unsigned4_array(array)
+        implicit none
+        type (unSigned4_array_type), intent (in) :: array
+        integer*8 :: get_bytes_unsigned4_array
+        type (unSigned4_array_type) :: tmp
+        get_bytes_unsigned4_array = sizeof(tmp) + (bytessigned4 * array%size)
+    end function get_bytes_unsigned4_array
+
     !Verify that all the numbers that can be represented with the
     !Unsigned Integer (kind=4) type are correct
     subroutine test_Signed4()
+        use print_module, only: get_memory_units
+        use unsigned1_module, only: maxUnSigned1
+        use unsigned2_module, only: maxUnSigned2
+        use unsigned3_module, only: maxUnSigned3
         implicit none
         integer*8 :: i, j
         character*32 :: string
+        type (unSigned4_array_type) :: array
         write(string,*) maxUnSigned4
         write(*,*) 'UnSigned4: From 0 to ' // trim(adjustl(string))
         do i = 0, maxUnSigned4
@@ -139,6 +153,17 @@ module unSigned4_module
                 stop
             end if
         end do
+        array%size = maxUnSigned4
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned4 array : ' // get_memory_units(get_bytes_unsigned4_array(array))
+        write(string,*) maxUnSigned1        
+        array%size = maxUnSigned1
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned4 array : ' // get_memory_units(get_bytes_unsigned4_array(array))
+        write(string,*) maxUnSigned2
+        array%size = maxUnSigned2
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned3 array : ' // get_memory_units(get_bytes_unsigned4_array(array))
+        write(string,*) maxUnSigned3
+        array%size = maxUnSigned3
+        write(*,*) 'Size of ' // trim(adjustl(string)) // ' Unsigned3 array : ' // get_memory_units(get_bytes_unsigned4_array(array))
     end subroutine test_Signed4
 
 
