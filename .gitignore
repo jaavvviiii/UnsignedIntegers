@@ -32,3 +32,7 @@
 Debug/
 Release/
 *.sln
+*.suo
+*.u2d
+*.pdb
+
