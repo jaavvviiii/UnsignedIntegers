@@ -27,10 +27,13 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<Filter Name="Print">
+		<File RelativePath=".\src\Print\Print.f90"/></Filter>
 		<Filter Name="Unsigned">
 		<File RelativePath=".\src\Unsigned\Unsigned1.f90"/>
 		<File RelativePath=".\src\Unsigned\Unsigned2.f90"/>
 		<File RelativePath=".\src\Unsigned\Unsigned3.f90"/>
-		<File RelativePath=".\src\Unsigned\Unsigned4.f90"/></Filter>
+		<File RelativePath=".\src\Unsigned\Unsigned4.f90"/>
+		<File RelativePath=".\src\Unsigned\UnsignedArray.f90"/></Filter>
 		<File RelativePath=".\src\Main.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
